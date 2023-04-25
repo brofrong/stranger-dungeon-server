@@ -1,15 +1,11 @@
-// import { Application } from "https://deno.land/x/oak@v12.2.0/mod.ts";
-// import { setRouter } from "./src/router.ts";
-
-// const app = new Application();
-// const port = 8000;
-
-// setRouter(app);
-
-// console.log("Listening at http://localhost:" + port);
-// await app.listen({ port });
-
 import { serve } from "https://deno.land/std@0.184.0/http/server.ts";
+import { WS } from "./src/types/Websocket.type.ts";
+import {
+  wsOnCLose,
+  wsOnError,
+  wsOnMassage,
+  wsOnOpen,
+} from "./src/wsManager.ts";
 
 serve((req) => {
   const upgrade = req.headers.get("upgrade") || "";
@@ -17,12 +13,19 @@ serve((req) => {
     return new Response("request isn't trying to upgrade to websocket.");
   }
   const { socket, response } = Deno.upgradeWebSocket(req);
-  socket.onopen = () => console.log("socket opened");
-  socket.onmessage = (e) => {
-    console.log("socket message:", e.data);
-    socket.send(new Date().toString());
-  };
-  socket.onerror = (e) => console.log("socket errored:", e.toString());
-  socket.onclose = () => console.log("socket closed");
+
+  const url = new URL(req.url);
+  const id = url.searchParams.get("id");
+  if (!id) {
+    socket.close(1, "no user id");
+  }
+
+  const ws: WS = Object.assign(socket, { data: { id } }) as any;
+
+  ws.onopen = wsOnOpen;
+  ws.onmessage = wsOnMassage;
+  ws.onerror = wsOnError;
+  ws.onclose = wsOnCLose;
+
   return response;
 });
