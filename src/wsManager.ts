@@ -30,7 +30,12 @@ class WSManager {
 
     toSendUsers.forEach((u) => {
       if (env.ServerRegion !== u.user.region) {
-        channel.postMessage(JSON.stringify(event));
+        channel.postMessage(
+          JSON.stringify({
+            event: event.event,
+            data: { data: event.data, sender: sender },
+          })
+        );
       } else {
         u.ws.send(JSON.stringify(event));
       }
@@ -67,7 +72,10 @@ channel.onmessage = (event: MessageEvent) => {
       }
       default: {
         const messageData: MessageData = parsedData.data;
-        wsManager.messageEmitter.emit(parsedData.event, messageData);
+        wsManager.messageEmitter.emit(parsedData.event, {
+          data: messageData.data,
+          sender: messageData.sender,
+        });
       }
     }
   } catch (e) {
