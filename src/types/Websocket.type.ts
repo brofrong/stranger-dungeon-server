@@ -1,9 +1,7 @@
-export type userInfo = {
-  id?: string;
-};
+import { User } from "../user/user.d.ts";
 
 export type WS = {
-  data: userInfo;
+  user: User;
   onopen: (this: WS, event: Event) => void;
   onmessage: (this: WS, event: MessageEvent) => void;
   onerror: (this: WS, event: Event | ErrorEvent) => void;

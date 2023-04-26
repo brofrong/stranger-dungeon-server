@@ -6,6 +6,7 @@ import {
   wsOnMassage,
   wsOnOpen,
 } from "./src/wsManager.ts";
+import { getUserFromUrl } from "./src/user/user.ts";
 
 serve((req) => {
   const upgrade = req.headers.get("upgrade") || "";
@@ -14,13 +15,9 @@ serve((req) => {
   }
   const { socket, response } = Deno.upgradeWebSocket(req);
 
-  const url = new URL(req.url);
-  const id = url.searchParams.get("id");
-  if (!id) {
-    socket.close(1, "no user id");
-  }
+  const user = getUserFromUrl(req.url);
 
-  const ws: WS = Object.assign(socket, { data: { id } }) as any;
+  const ws: WS = Object.assign(socket, { user }) as any;
 
   ws.onopen = wsOnOpen;
   ws.onmessage = wsOnMassage;
