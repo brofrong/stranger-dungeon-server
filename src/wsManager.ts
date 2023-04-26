@@ -71,7 +71,7 @@ channel.onmessage = (event: MessageEvent) => {
       }
     }
   } catch (e) {
-    console.error(`invalid data ${event.data}`);
+    console.error(`invalid data ${event.data}, ${e?.message?.toString()}`);
   }
 };
 
